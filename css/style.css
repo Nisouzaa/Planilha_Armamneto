@@ -1,0 +1,143 @@
+/* style.css - tema militar */
+:root {
+  --bg: #0f1510;
+  --panel: #182218;
+  --accent: #9fbf60;
+  --muted: #7a7a6a;
+  --border: #39502d;
+  --text: #e6ebdc;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  font-family: "Roboto Mono", monospace;
+  background: linear-gradient(180deg, var(--bg), #07110a);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+}
+.wrap {
+  max-width: 1100px;
+  margin: 28px auto;
+  padding: 18px;
+}
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 12px 18px;
+  background: linear-gradient(90deg, var(--panel), #0f1a12);
+  border: 2px solid var(--border);
+  border-radius: 8px;
+}
+.logo {
+  background: var(--accent);
+  color: #081006;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-weight: 800;
+}
+.title {
+  font-size: 1.1rem;
+  opacity: 0.95;
+}
+
+.main {
+  display: grid;
+  grid-template-columns: 350px 1fr;
+  gap: 14px;
+  margin-top: 14px;
+}
+
+.controls {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.controls input {
+  flex: 1;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: #0b120b;
+  color: var(--text);
+}
+.controls button {
+  padding: 8px 12px;
+  border-radius: 6px;
+  background: var(--accent);
+  border: none;
+  color: #08210a;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.panel {
+  background: linear-gradient(180deg, #0f1710, #0b150b);
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+.panel h2 {
+  margin: 0 0 8px 0;
+  color: var(--accent);
+}
+
+.chartBox {
+  margin-bottom: 10px;
+}
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.list .row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.2);
+  border-left: 4px solid var(--border);
+}
+.recordsList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 10px;
+}
+.recordItem {
+  padding: 10px;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.15);
+  border-left: 4px solid var(--border);
+}
+
+.footer {
+  text-align: center;
+  margin-top: 18px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+/* Single view */
+.singleMain {
+  display: flex;
+  justify-content: center;
+}
+.single .panel {
+  max-width: 720px;
+}
+#infoContent .field {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.12);
+  margin-bottom: 8px;
+  border-left: 4px solid var(--border);
+}
+#infoContent .field strong {
+  color: var(--accent);
+  min-width: 160px;
+}
