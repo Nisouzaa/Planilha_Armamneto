@@ -1,17 +1,27 @@
 // arma.js
-const WEB_APP_URL ="https://script.google.com/macros/s/AKfycbxg8BIA9AgdWm6I4gN0Mh7hYc-jm2SIW5cisXgruMBBpc5F2b7jCabcak5to9LBLqULTw/exec";
+const WEB_APP_URL =
+  "https://script.google.com/macros/s/AKfycbzQqxwOpkaSbAtX36-VOgssmOSrQ-PqXTLaesITu0RO1Ak3_0VVoUJHdXY1IBfVzXDiqA/exec";
 
 const params = new URLSearchParams(window.location.search);
 const idParam = params.get("id");
 const infoContent = document.getElementById("infoContent");
 const infoBox = document.getElementById("infoBox");
 
+function createFieldHtml(key, value) {
+  return `<div class="field"><strong>${key}</strong><span>${
+    value === "-" || value === "" ? "—" : value
+  }</span></div>`;
+}
+
 async function loadArm() {
+  if (!infoContent) return;
   if (!idParam) {
     infoContent.innerHTML = "<div class='field'>❌ Nenhum ID informado</div>";
     return;
   }
+
   try {
+    infoBox.querySelector("h2").textContent = `Ficha — ID ${idParam}`;
     const res = await fetch(
       `${WEB_APP_URL}?action=get&id=${encodeURIComponent(idParam)}`
     );
@@ -20,8 +30,23 @@ async function loadArm() {
       infoContent.innerHTML = `<div class='field'>❌ ${json.erro}</div>`;
       return;
     }
-    const regs = json.registros;
+
+    const regs = json.registros || [];
     infoContent.innerHTML = "";
+
+    // mostra QR na parte superior (apenas 1 QR para o ID, apontando para a ficha)
+   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(
+    WEB_APP_URL + "?id=" + idParam
+)}`;
+
+
+    const qrBox = document.createElement("div");
+    qrBox.style.display = "flex";
+    qrBox.style.justifyContent = "flex-end";
+    qrBox.style.marginBottom = "8px";
+    qrBox.innerHTML = `<div style="text-align:center"><img alt="QR" src="${qrUrl}" style="max-width:180px"><div style="font-size:12px;margin-top:6px">ID ${idParam}</div></div>`;
+    infoContent.appendChild(qrBox);
+
     regs.forEach((r, idx) => {
       const container = document.createElement("div");
       container.style.marginBottom = "8px";
@@ -30,15 +55,16 @@ async function loadArm() {
           idx + 1
         }</div>` +
         Object.keys(r)
-          .map(
-            (k) =>
-              `<div class="field"><strong>${k}</strong><span>${
-                r[k] === "-" || r[k] === "" ? "—" : r[k]
-              }</span></div>`
-          )
+          .map((k) => createFieldHtml(k, r[k]))
           .join("");
       infoContent.appendChild(container);
     });
+
+    // se não houver registros
+    if (regs.length === 0) {
+      infoContent.innerHTML +=
+        "<div class='field'>Nenhum registro encontrado para este ID.</div>";
+    }
   } catch (e) {
     infoContent.innerHTML = `<div class='field'>⚠ Erro ao carregar: ${e.message}</div>`;
   }
@@ -46,6 +72,7 @@ async function loadArm() {
 
 document.addEventListener("DOMContentLoaded", () => {
   loadArm();
+
   const pb = document.getElementById("printBtn");
   if (pb) pb.addEventListener("click", () => window.print());
 });
