@@ -1,6 +1,6 @@
 // dashboard.js
 const WEB_APP_URL =
-  "https://script.google.com/macros/s/AKfycbzQqxwOpkaSbAtX36-VOgssmOSrQ-PqXTLaesITu0RO1Ak3_0VVoUJHdXY1IBfVzXDiqA/exec";
+  "https://script.google.com/macros/s/AKfycbzg0g_0tRtcBkNtQSMxhXa2hDh5xi-GZLAfug_fYMx6890aNU1ZSywzs74ArXb30o4bPA/exec";
 
 const $ = (sel) => document.querySelector(sel);
 const $$ = (sel) => document.querySelectorAll(sel);
@@ -11,7 +11,9 @@ async function fetchStats() {
 }
 
 async function fetchById(id) {
-  const res = await fetch(`${WEB_APP_URL}?action=stats`);
+  const res = await fetch(
+    `${WEB_APP_URL}?action=get&id=${encodeURIComponent(id)}`
+  );
   return await res.json();
 }
 
@@ -21,7 +23,7 @@ async function fetchRecentRecords(limit = 20) {
   const ids =
     st.stats && st.stats.summary ? st.stats.summary.map((s) => s.ID) : [];
   const records = [];
-  for (let id of ids.slice(0, Math.max(limit, 50))) {
+  for (let id of ids.slice(0, limit)) {
     const json = await fetchById(id);
     if (json.registros) records.push(...json.registros);
     if (records.length >= limit) break;
@@ -102,10 +104,10 @@ async function refreshAll() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  refreshAll();
 
-  const refreshAll = $("#refreshBtn");
+  const refreshBtn = $("#refreshBtn");
   if (refreshBtn) refreshBtn.addEventListener("click", refreshAll);
+   refreshAll();
 
   const searchInput = $("#searchInput");
   if (searchInput) {

@@ -1,6 +1,5 @@
 // arma.js
-const WEB_APP_URL =
-  "https://script.google.com/macros/s/AKfycbzQqxwOpkaSbAtX36-VOgssmOSrQ-PqXTLaesITu0RO1Ak3_0VVoUJHdXY1IBfVzXDiqA/exec";
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzg0g_0tRtcBkNtQSMxhXa2hDh5xi-GZLAfug_fYMx6890aNU1ZSywzs74ArXb30o4bPA/exec"
 
 const params = new URLSearchParams(window.location.search);
 const idParam = params.get("id");
@@ -35,9 +34,7 @@ async function loadArm() {
     infoContent.innerHTML = "";
 
     // mostra QR na parte superior (apenas 1 QR para o ID, apontando para a ficha)
-   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(
-    WEB_APP_URL + "?id=" + idParam
-)}`;
+   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(WEB_APP_URL + "?action=get&id=" + idParam)}`;
 
 
     const qrBox = document.createElement("div");
