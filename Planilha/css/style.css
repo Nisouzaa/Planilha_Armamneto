@@ -17,20 +17,25 @@ body {
   color: var(--text);
   -webkit-font-smoothing: antialiased;
 }
+
+
 .wrap {
   max-width: 1100px;
   margin: 28px auto;
   padding: 18px;
+  font-size: 10px;
 }
+
 .topbar {
   display: flex;
   align-items: center;
-  gap: 18px;
+  gap: 14px;
   padding: 12px 18px;
   background: linear-gradient(90deg, var(--panel), #0f1a12);
   border: 2px solid var(--border);
   border-radius: 8px;
 }
+
 .logo {
   background: var(--accent);
   color: #081006;
@@ -38,31 +43,38 @@ body {
   border-radius: 6px;
   font-weight: 800;
 }
+
 .title {
   font-size: 1.1rem;
   opacity: 0.95;
+  padding: 12px auto;
 }
 
 .main {
-  display: grid;
-  grid-template-columns: 350px 1fr;
-  gap: 14px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 8px 12px;
   margin-top: 14px;
+  width: 100%;
 }
 
 .controls {
   display: flex;
-  gap: 8px;
+  gap: 0.4rem;
   align-items: center;
+  justify-content: flex-end;
 }
+
+
 .controls input {
-  flex: 1;
   padding: 8px;
   border-radius: 6px;
   border: 1px solid var(--border);
   background: #0b120b;
   color: var(--text);
 }
+
 .controls button {
   padding: 8px 12px;
   border-radius: 6px;
@@ -120,7 +132,7 @@ body {
   font-size: 12px;
 }
 
-/* Single view */
+
 .singleMain {
   display: flex;
   justify-content: center;
