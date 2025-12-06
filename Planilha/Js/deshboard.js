@@ -5,6 +5,8 @@ const WEB_APP_URL =
 const $ = (sel) => document.querySelector(sel);
 const $$ = (sel) => document.querySelectorAll(sel);
 
+// --------- API -----------
+
 async function fetchStats() {
   const res = await fetch(`${WEB_APP_URL}?action=stats`);
   return await res.json();
@@ -19,9 +21,7 @@ async function fetchById(id) {
 
 async function fetchRecentRecords(limit = 20) {
   const st = await fetchStats();
-  // montar array de IDs ordenados por tiros desc
-  const ids =
-    st.stats && st.stats.summary ? st.stats.summary.map((s) => s.ID) : [];
+  const ids = st.stats?.summary?.map((s) => s.ID) || [];
   const records = [];
   for (let id of ids.slice(0, limit)) {
     const json = await fetchById(id);
@@ -31,6 +31,8 @@ async function fetchRecentRecords(limit = 20) {
   return records.slice(0, limit);
 }
 
+// ---------- Renderização ----------
+
 function renderStats(statsObj) {
   const tirosList = $("#tirosList");
   const maintList = $("#maintList");
@@ -38,23 +40,17 @@ function renderStats(statsObj) {
   maintList.innerHTML = "";
 
   const summary = statsObj.stats.summary || [];
-  // ordenar por totalTiros desc
   summary.sort((a, b) => (b.totalTiros || 0) - (a.totalTiros || 0));
 
   for (const s of summary.slice(0, 30)) {
-    const row = document.createElement("div");
-    row.className = "row";
-    row.innerHTML = `<div>ID ${s.ID}</div><div>${
-      s.totalTiros || 0
-    } tiros</div>`;
-    tirosList.appendChild(row);
-
-    const row2 = document.createElement("div");
-    row2.className = "row";
-    row2.innerHTML = `<div>ID ${s.ID}</div><div>${
+    tirosList.innerHTML += `
+      <div class="row"><div>ID ${s.ID}</div><div>${s.totalTiros} tiros</div></div>
+    `;
+    maintList.innerHTML += `
+      <div class="row"><div>ID ${s.ID}</div><div>${
       s.lastMaintenance || "—"
-    }</div>`;
-    maintList.appendChild(row2);
+    }</div></div>
+    `;
   }
 }
 
@@ -66,25 +62,27 @@ function renderRecords(list) {
       "<div class='recordItem'>Nenhum registro encontrado</div>";
     return;
   }
-  for (const r of list) {
-    const el = document.createElement("div");
-    el.className = "recordItem";
-    const id = r["ID"] || "-";
-    el.innerHTML = `<div><strong>${r["Armamento"] || "—"} ${
-      r["Modelo"] || ""
-    } — Nº ${r["Nº"] || "—"}</strong></div>
-                    <div>ID: ${r["ID"]} • Dono: ${r["Dono"] || "—"} • Tiros: ${
+  list.forEach((r) => {
+    container.innerHTML += `
+      <div class="recordItem">
+        <strong>${r["Armamento"] || "—"} ${r["Modelo"] || ""} — Nº ${
+      r["Nº"] || "—"
+    }</strong>
+        <div>ID: ${r["ID"]} • Dono: ${r["Dono"] || "—"} • Tiros: ${
       r["Quantidade de tiros"] || "—"
     }</div>
-                    <div>Peças: ${r["Peças quebradas"] || "—"} • Manutenção: ${
+        <div>Peças: ${r["Peças quebradas"] || "—"} • Manutenção: ${
       r["Data da última manutenção"] || "—"
     } • Resp: ${r["Responsável pela manutenção"] || "—"}</div>
-                    <div style="margin-top:6px"><a target="_blank" href="./arma.html?id=${encodeURIComponent(
-                      r["ID"]
-                    )}">Abrir ficha / QR</a></div>`;
-    container.appendChild(el);
-  }
+        <div style="margin-top:6px"><a target="_blank" href="./arma.html?id=${encodeURIComponent(
+          r["ID"]
+        )}">Abrir ficha / QR</a></div>
+      </div>
+    `;
+  });
 }
+
+//---------- Atualização Completa ----------
 
 async function refreshAll() {
   try {
@@ -103,120 +101,47 @@ async function refreshAll() {
   }
 }
 
+//--------- Eventos ----------
+
 document.addEventListener("DOMContentLoaded", () => {
-  // helpers
-  const $ = (sel) => document.querySelector(sel);
+  console.log("DOM carregado!");
 
   const refreshBtn = $("#refreshBtn");
+  console.log("refreshBtn:", refreshBtn);
+
   if (refreshBtn) refreshBtn.addEventListener("click", refreshAll);
 
-  // chama atualização inicial
-  if (typeof refreshAll === "function") refreshAll();
-
   const searchInput = $("#searchInput");
+  console.log("searchInput:", searchInput);
+
   if (searchInput) {
     searchInput.addEventListener("keydown", async (ev) => {
-      if (ev.key === "Enter") {
-        ev.preventDefault();
-        const q = ev.target.value.trim().toLowerCase();
-        console.log("Busca iniciada:", q);
+      if (ev.key !== "Enter") return;
 
-        if (!q) {
-          console.log("Campo vazio — atualizando tudo");
-          return typeof refreshAll === "function" ? refreshAll() : null;
-        }
+      ev.preventDefault();
+      const q = ev.target.value.trim().toLowerCase();
+      console.log("Busca por:", q);
 
-        try {
-          // valida se as funções existem
-          if (
-            typeof fetchStats !== "function" ||
-            typeof fetchById !== "function"
-          ) {
-            console.error("fetchStats ou fetchById não definidos");
-            return;
+      if (!q) return refreshAll();
+
+      const stats = await fetchStats();
+      const ids = stats.stats?.summary?.map(s => s.ID) || [];
+
+      const found = [];
+      for (const id of ids) {
+        const json = await fetchById(id);
+        if (!json?.registros) continue;
+
+        for (const r of json.registros) {
+          if (Object.values(r).join(" ").toLowerCase().includes(q)) {
+            found.push(r);
+            if (found.length >= 50) break;
           }
-
-          const stats = await fetchStats();
-          const ids =
-            stats && stats.stats && Array.isArray(stats.stats.summary)
-              ? stats.stats.summary.map((s) => s.ID)
-              : [];
-
-          console.log("IDs disponíveis para busca:", ids);
-
-          const foundRecords = [];
-          for (const id of ids) {
-            const json = await fetchById(id);
-            if (!json) continue;
-            if (json.registros && Array.isArray(json.registros)) {
-              for (const r of json.registros) {
-                if (Object.values(r).join(" ").toLowerCase().includes(q)) {
-                  foundRecords.push(r);
-                }
-                if (foundRecords.length >= 50) break;
-              }
-            }
-            if (foundRecords.length >= 50) break;
-          }
-
-          console.log("Registros encontrados:", foundRecords.length);
-          if (typeof renderRecords === "function") {
-            renderRecords(foundRecords.slice(0, 50));
-          } else {
-            console.warn(
-              "renderRecords não está definido — imprima no console:"
-            );
-            console.log(foundRecords.slice(0, 50));
-          }
-        } catch (e) {
-          console.error("Erro na busca:", e);
         }
       }
+      renderRecords(found);
     });
-  } else {
-    console.warn("#searchInput não encontrado no DOM");
   }
+
+  refreshAll();
 });
-
-// document.addEventListener("DOMContentLoaded", () => {
-
-//   const refreshBtn = $("#refreshBtn");
-//   if (refreshBtn) refreshBtn.addEventListener("click", refreshAll);
-//    refreshAll();
-
-//   const searchInput = $("#searchInput");
-//   if (searchInput) {
-//     searchInput.addEventListener("keydown", async (ev) => {
-//       if (ev.key === "Enter") {
-//         const q = ev.target.value.trim().toLowerCase();
-//         if (!q) return refreshAll();
-
-//         try {
-//           // pega todos os IDs do summary e busca registros por ID
-//           const stats = await fetchStats();
-//           const ids =
-//             stats.stats && stats.stats.summary
-//               ? stats.stats.summary.map((s) => s.ID)
-//               : [];
-//           const foundRecords = [];
-//           for (const id of ids) {
-//             const json = await fetchById(id);
-//             if (json.registros) {
-//               for (const r of json.registros) {
-//                 if (Object.values(r).join(" ").toLowerCase().includes(q))
-//                   foundRecords.push(r);
-//                 if (foundRecords.length >= 50) break;
-//               }
-//             }
-//             if (foundRecords.length >= 50) break;
-//           }
-//           renderRecords(foundRecords.slice(0, 50));
-//         } catch (e) {
-//           console.error(e);
-//         }
-//       }
-//     });
-//   }
-// });
-
-// https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://script.google.com/macros/s/AKfycbxg8BIA9AgdWm6I4gN0Mh7hYc-jm2SIW5cisXgruMBBpc5F2b7jCabcak5to9LBLqULTw/exec
