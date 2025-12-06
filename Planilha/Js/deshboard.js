@@ -104,44 +104,119 @@ async function refreshAll() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+  // helpers
+  const $ = (sel) => document.querySelector(sel);
 
   const refreshBtn = $("#refreshBtn");
   if (refreshBtn) refreshBtn.addEventListener("click", refreshAll);
-   refreshAll();
+
+  // chama atualização inicial
+  if (typeof refreshAll === "function") refreshAll();
 
   const searchInput = $("#searchInput");
   if (searchInput) {
     searchInput.addEventListener("keydown", async (ev) => {
       if (ev.key === "Enter") {
+        ev.preventDefault();
         const q = ev.target.value.trim().toLowerCase();
-        if (!q) return refreshAll();
+        console.log("Busca iniciada:", q);
+
+        if (!q) {
+          console.log("Campo vazio — atualizando tudo");
+          return typeof refreshAll === "function" ? refreshAll() : null;
+        }
 
         try {
-          // pega todos os IDs do summary e busca registros por ID
+          // valida se as funções existem
+          if (
+            typeof fetchStats !== "function" ||
+            typeof fetchById !== "function"
+          ) {
+            console.error("fetchStats ou fetchById não definidos");
+            return;
+          }
+
           const stats = await fetchStats();
           const ids =
-            stats.stats && stats.stats.summary
+            stats && stats.stats && Array.isArray(stats.stats.summary)
               ? stats.stats.summary.map((s) => s.ID)
               : [];
+
+          console.log("IDs disponíveis para busca:", ids);
+
           const foundRecords = [];
           for (const id of ids) {
             const json = await fetchById(id);
-            if (json.registros) {
+            if (!json) continue;
+            if (json.registros && Array.isArray(json.registros)) {
               for (const r of json.registros) {
-                if (Object.values(r).join(" ").toLowerCase().includes(q))
+                if (Object.values(r).join(" ").toLowerCase().includes(q)) {
                   foundRecords.push(r);
+                }
                 if (foundRecords.length >= 50) break;
               }
             }
             if (foundRecords.length >= 50) break;
           }
-          renderRecords(foundRecords.slice(0, 50));
+
+          console.log("Registros encontrados:", foundRecords.length);
+          if (typeof renderRecords === "function") {
+            renderRecords(foundRecords.slice(0, 50));
+          } else {
+            console.warn(
+              "renderRecords não está definido — imprima no console:"
+            );
+            console.log(foundRecords.slice(0, 50));
+          }
         } catch (e) {
-          console.error(e);
+          console.error("Erro na busca:", e);
         }
       }
     });
+  } else {
+    console.warn("#searchInput não encontrado no DOM");
   }
 });
+
+// document.addEventListener("DOMContentLoaded", () => {
+
+//   const refreshBtn = $("#refreshBtn");
+//   if (refreshBtn) refreshBtn.addEventListener("click", refreshAll);
+//    refreshAll();
+
+//   const searchInput = $("#searchInput");
+//   if (searchInput) {
+//     searchInput.addEventListener("keydown", async (ev) => {
+//       if (ev.key === "Enter") {
+//         const q = ev.target.value.trim().toLowerCase();
+//         if (!q) return refreshAll();
+
+//         try {
+//           // pega todos os IDs do summary e busca registros por ID
+//           const stats = await fetchStats();
+//           const ids =
+//             stats.stats && stats.stats.summary
+//               ? stats.stats.summary.map((s) => s.ID)
+//               : [];
+//           const foundRecords = [];
+//           for (const id of ids) {
+//             const json = await fetchById(id);
+//             if (json.registros) {
+//               for (const r of json.registros) {
+//                 if (Object.values(r).join(" ").toLowerCase().includes(q))
+//                   foundRecords.push(r);
+//                 if (foundRecords.length >= 50) break;
+//               }
+//             }
+//             if (foundRecords.length >= 50) break;
+//           }
+//           renderRecords(foundRecords.slice(0, 50));
+//         } catch (e) {
+//           console.error(e);
+//         }
+//       }
+//     });
+//   }
+// });
 
 // https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://script.google.com/macros/s/AKfycbxg8BIA9AgdWm6I4gN0Mh7hYc-jm2SIW5cisXgruMBBpc5F2b7jCabcak5to9LBLqULTw/exec

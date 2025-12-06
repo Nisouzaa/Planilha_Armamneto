@@ -16,35 +16,41 @@
 
   <div class="wrap">
     <header class="topbar">
-      <div class="logo">FRAAL</div>
-      <div class="title">Painel de Controle — Armamentos</div>
+      <div class="topbar-left">
+        <div class="logo">FRAAL</div>
+        <div class="title">Painel de Controle — Armamentos</div>
+      </div>
 
-      <main class="main">
+      <div class="main">
         <section class="controls">
           <input id="searchInput" placeholder="Buscar ID ou Modelo..." />
           <button id="refreshBtn">Atualizar</button>
         </section>
+      </div>
     </header>
 
+    <main class="content">
 
-    <section id="statsPanel" class="panel">
-      <h2>Estatísticas</h2>
-      <div id="charts">
-        <div id="chartTiros" class="chartBox">
-          <h3>Tiros por ID</h3>
-          <div id="tirosList" class="list"></div>
-        </div>
-        <div id="chartMaint" class="chartBox">
-          <h3>Última Manutenção</h3>
-          <div id="maintList" class="list"></div>
-        </div>
-      </div>
-    </section>
+      <section id="recordsPanel" class="panel">
+        <h2>Registros (últimas linhas)</h2>
+        <div id="recordsList" class="recordsList"></div>
+      </section>
 
-    <section id="recordsPanel" class="panel">
-      <h2>Registros (últimas linhas)</h2>
-      <div id="recordsList" class="recordsList"></div>
-    </section>
+      <section id="statsPanel" class="panel">
+        <h2>Estatísticas</h2>
+        <div id="charts">
+          <div id="chartTiros" class="chartBox">
+            <h3>Tiros por ID</h3>
+            <div id="tirosList" class="list"></div>
+          </div>
+          <div id="chartMaint" class="chartBox">
+            <h3>Última Manutenção</h3>
+            <div id="maintList" class="list"></div>
+          </div>
+        </div>
+      </section>
+
+
     </main>
 
     <footer class="footer">⚠️ Confidencial — Uso interno</footer>

@@ -1,5 +1,6 @@
 // arma.js
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzg0g_0tRtcBkNtQSMxhXa2hDh5xi-GZLAfug_fYMx6890aNU1ZSywzs74ArXb30o4bPA/exec"
+const WEB_APP_URL =
+  "https://script.google.com/macros/s/AKfycbzg0g_0tRtcBkNtQSMxhXa2hDh5xi-GZLAfug_fYMx6890aNU1ZSywzs74ArXb30o4bPA/exec";
 
 const params = new URLSearchParams(window.location.search);
 const idParam = params.get("id");
@@ -34,28 +35,53 @@ async function loadArm() {
     infoContent.innerHTML = "";
 
     // mostra QR na parte superior (apenas 1 QR para o ID, apontando para a ficha)
-   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(WEB_APP_URL + "?action=get&id=" + idParam)}`;
 
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(
+      window.location.origin + "/arma.html?id=" + idParam
+    )}`;
 
     const qrBox = document.createElement("div");
-    qrBox.style.display = "flex";
-    qrBox.style.justifyContent = "flex-end";
-    qrBox.style.marginBottom = "8px";
-    qrBox.innerHTML = `<div style="text-align:center"><img alt="QR" src="${qrUrl}" style="max-width:180px"><div style="font-size:12px;margin-top:6px">ID ${idParam}</div></div>`;
+    qrBox.className = "qr-box";
+    qrBox.innerHTML = `
+      <img alt="QR code" src="${qrUrl}">
+      <div class="qr-caption">ID ${idParam}</div>
+    `;
     infoContent.appendChild(qrBox);
 
+    // registros
     regs.forEach((r, idx) => {
       const container = document.createElement("div");
-      container.style.marginBottom = "8px";
-      container.innerHTML =
-        `<div style="font-weight:700;color:var(--accent);margin-bottom:6px">Registro ${
-          idx + 1
-        }</div>` +
-        Object.keys(r)
+      container.className = "registroBox";
+      container.innerHTML = `
+        <div class="registroTitulo">Registro ${idx + 1}</div>
+        ${Object.keys(r)
           .map((k) => createFieldHtml(k, r[k]))
-          .join("");
+          .join("")}
+      `;
       infoContent.appendChild(container);
     });
+
+    //  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(WEB_APP_URL + "?action=get&id=" + idParam)}`;
+
+    //   const qrBox = document.createElement("div");
+    //   qrBox.style.display = "flex";
+    //   qrBox.style.justifyContent = "flex-end";
+    //   qrBox.style.marginBottom = "8px";
+    //   qrBox.innerHTML = `<div style="text-align:center"><img alt="QR" src="${qrUrl}" style="max-width:180px"><div style="font-size:12px;margin-top:6px">ID ${idParam}</div></div>`;
+    //   infoContent.appendChild(qrBox);
+
+    //   regs.forEach((r, idx) => {
+    //     const container = document.createElement("div");
+    //     container.style.marginBottom = "8px";
+    //     container.innerHTML =
+    //       `<div style="font-weight:700;color:var(--accent);margin-bottom:6px">Registro ${
+    //         idx + 1
+    //       }</div>` +
+    //       Object.keys(r)
+    //         .map((k) => createFieldHtml(k, r[k]))
+    //         .join("");
+    //     infoContent.appendChild(container);
+    //   });
 
     // se não houver registros
     if (regs.length === 0) {
